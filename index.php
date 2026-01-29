@@ -1,7 +1,7 @@
 <?php
 session_start();
 
-// Main lagi
+// === Reset Game ===
 if (isset($_POST['ulang'])) {
     session_unset();
     header("Location: " . $_SERVER['PHP_SELF']);
@@ -11,7 +11,7 @@ if (isset($_POST['ulang'])) {
 $pemberitahuan = "";
 $pemberitahuan2 = "";
 
-// soal aritmatika sesuai tingkat kesulitan
+// === HELPER FUNCTION ===
 function buatSoalAritmatika($level) {
     if ($level === "mudah") {
         $ops = ['+', '-'];
@@ -21,20 +21,18 @@ function buatSoalAritmatika($level) {
         $ops = ['+', '-', '*'];
         $a = rand(5, 20);
         $b = rand(5, 20);
-    } else { // sulit
+    } else {
         $ops = ['+', '-', '*', '/'];
         $a = rand(10, 50);
         $b = rand(1, 50);
     }
 
-    $op = $ops[array_rand($ops)]; // ambil satu nilai acak dari array var ops
+    $op = $ops[array_rand($ops)];
 
-    // kalau sistem memilih pembagian hasilkan bil bulat, dgn cara melipatkan bil a/b
     if ($op === '/') {
-        $a = $a * $b; //contoh 7 * 3 = 21
+        $a = $a * $b;
     }
 
-    // hitung jawaban
     switch ($op) {
         case '+': $jawaban = $a + $b; break;
         case '-': $jawaban = $a - $b; break;
@@ -43,63 +41,55 @@ function buatSoalAritmatika($level) {
         default: $jawaban = 0;
     }
 
-    // ganti operator untuk tampilan web
     $displayOp = $op;
     if ($op === '*') $displayOp = '×';
     if ($op === '/') $displayOp = '÷';
 
     $soal_display = "$a $displayOp $b";
 
-    return [$soal_display, $jawaban]; //mengembalikan/menampilkan nilai intinya gini lah
+    return [$soal_display, $jawaban];
 }
 
-// apakah belum ada var game_over || untuk menghindari undefined index
 if (!isset($_SESSION['game_over'])) {
-    $_SESSION['game_over'] = false; //artinya game masih berjalan
+    $_SESSION['game_over'] = false;
 }
 
-// STEP 1: Pilih mode game
+// === Pilih Tingkat/Batas ===
 if (isset($_POST['mode']) && !isset($_POST['lanjut'])) {
-    // var kesempatan blm ada || belum memulai game
     if (!isset($_SESSION['kesempatan'])) {
-        $_SESSION['mode'] = $_POST['mode']; // menyimpan mode || user bisa ganti mode
+        $_SESSION['mode'] = $_POST['mode']; 
     } else {
-        $_SESSION['mode'] = $_SESSION['mode']; // game sudah berjalan || tidak bisa ganti mode
+        $_SESSION['mode'] = $_SESSION['mode']; 
     }
 }
 
-// STEP 2: Pilih tingkat kesulitan & mulai game
+// === Mulai Game dengan Mode & Tingkat/Batas ===
 if (isset($_POST['lanjut'])) {
-    // mulai permainan baru
     $_SESSION['kesempatan'] = 5;
     $_SESSION['game_over'] = false;
     $pemberitahuan2 = "";
 
-    // user memilih mode angka
     if (isset($_SESSION['mode']) && $_SESSION['mode'] === "angka") {
-        $batas = (int)$_POST['range']; // batas angka
-        if ($batas < 1) $batas = 10; // user tidak memilih batas, default 10
-        $_SESSION['angka_rahasia'] = rand(1, $batas); // angka rahasia
-        $_SESSION['batas'] = $batas; // Simpan di session
-        $pemberitahuan = "Game dimulai! Tebak angka antara 1 - $batas"; // pemberitahuan
+        $batas = (int)$_POST['range'];
+        if ($batas < 1) $batas = 10;
+        $_SESSION['angka_rahasia'] = rand(1, $batas);
+        $_SESSION['batas'] = $batas;
+        $pemberitahuan = "Game dimulai! Tebak angka antara 1 - $batas";
 
-    } else { // user memilih mode aritmatika
-        $level = isset($_POST['level']) ? $_POST['level'] : 'mudah'; // user tidak memilih kesulitan, default mudah
-        $_SESSION['level'] = $level; // Simpan di session
-        list($soal, $jawaban) = buatSoalAritmatika($level); // membuat soal/jawaban
-        // Simpan di session
+    } else {
+        $level = isset($_POST['level']) ? $_POST['level'] : 'mudah'; 
+        $_SESSION['level'] = $level;
+        list($soal, $jawaban) = buatSoalAritmatika($level);
+
         $_SESSION['soal'] = $soal; 
         $_SESSION['jawaban'] = $jawaban;
-        $pemberitahuan = "Game dimulai! Jawab soal berikut: <br><b>$soal = ?</b>"; // pemberitahuan
+        $pemberitahuan = "Game dimulai! Jawab soal berikut: <br><b>$soal = ?</b>";
     }
 }
 
-// STEP 3: Menangani jawaban
-// user mengirim jawaban, permainan sedang berjalan, game blm selesai
+// === Proses Jawaban & Update Status Game ===
 if (isset($_POST['tebakan']) && isset($_SESSION['kesempatan']) && $_SESSION['game_over'] === false) {
-    // ambil tebakan user dgn trim supaya tidak error
     $raw = trim($_POST['tebakan']);
-    // tidak menerima desimal
     if ($raw === '') {
         $tebakan = null;
     } elseif (strpos($raw, '.') !== false) {
@@ -108,43 +98,33 @@ if (isset($_POST['tebakan']) && isset($_SESSION['kesempatan']) && $_SESSION['gam
         $tebakan = (int)$raw;
     }
 
-    // MODE TEBAK ANGKA
-    // mode diplih?, mode tersebut tebak angka?
     if (isset($_SESSION['mode']) && $_SESSION['mode'] === 'angka') {
         $angka_rahasia = $_SESSION['angka_rahasia']; // simpan di var lokal
         if ($tebakan === $angka_rahasia) {
             $pemberitahuan = "🎉 Selamat! Tebakanmu benar: $angka_rahasia 🎉";
             $_SESSION['game_over'] = true;
-            
         } else {
-            $_SESSION['kesempatan']--; //kurangi kesempatan
+            $_SESSION['kesempatan']--;
             if ($_SESSION['kesempatan'] <= 0) {
                 $pemberitahuan = "💀 Kesempatan habis! Angkanya adalah $angka_rahasia.";
                 $_SESSION['game_over'] = true;
-                
             } else {
-                // pemberitahuan
                 $pemberitahuan = "Tebak angka antara 1 - " . htmlspecialchars($_SESSION['batas']);
                 $pemberitahuan2 = ($tebakan > $angka_rahasia) ? "❌ Terlalu besar!" : "❌ Terlalu kecil!";
             }
         }
-        
-    // MODE ARITMATIKA
-    // mode diplih?, mode tersebut arimatika?
     } elseif (isset($_SESSION['mode']) && $_SESSION['mode'] === 'aritmatika') {
-        $jawaban = $_SESSION['jawaban']; // simpan di var lokal
+        $jawaban = $_SESSION['jawaban'];
 
-        // apa sama tebakan&jawaban / input angka & selisih sangat kecil, true
         if ($tebakan === $jawaban || (is_numeric($tebakan) && abs($tebakan - $jawaban) < 0.000001)) {
             $pemberitahuan = "🎉 Betul! " . htmlspecialchars($_SESSION['soal']) . " = $jawaban 🎉";
             $_SESSION['game_over'] = true;
         } else {
-            $_SESSION['kesempatan']--; //kurangi kesempatan
+            $_SESSION['kesempatan']--;
             if ($_SESSION['kesempatan'] <= 0) {
                 $pemberitahuan = "💀 Kesempatan habis! Jawaban benar: " . htmlspecialchars($_SESSION['soal']) . " = $jawaban.";
                 $_SESSION['game_over'] = true;
             } else {
-                // pemberitahuan
                 $pemberitahuan = "Jawab soal berikut: <br><b>" . htmlspecialchars($_SESSION['soal']) . " = ?</b>";
                 $pemberitahuan2 = "❌ Jawaban salah, coba lagi!";
             }
@@ -155,13 +135,11 @@ if (isset($_POST['tebakan']) && isset($_SESSION['kesempatan']) && $_SESSION['gam
     }
 }
 
-// True Permainan sedang berjalan?
+// === Set Tampilan Default Jika Belum Ada Input ===
 if (isset($_SESSION['kesempatan']) && $pemberitahuan === "") {
-    // mode arimatika & soal sudah ada
+
     if (isset($_SESSION['mode']) && $_SESSION['mode'] === 'aritmatika' && isset($_SESSION['soal'])) {
         $pemberitahuan = "Jawab soal berikut: <br><b>" . htmlspecialchars($_SESSION['soal']) . " = ?</b>";
-        
-        // mode tebak angka & soal sudah ada
     } elseif (isset($_SESSION['mode']) && $_SESSION['mode'] === 'angka' && isset($_SESSION['batas'])) {
         $pemberitahuan = "Tebak angka antara 1 - " . htmlspecialchars($_SESSION['batas']);
     }
@@ -184,8 +162,7 @@ if (isset($_SESSION['kesempatan']) && $pemberitahuan === "") {
 <div class="container">
     <h2>🎮 Brain Teasser Game</h2>
 
-    <!--- MEMBUAT TAMPILAN --->
-    <!-- Step 1: Pilih Mode -->
+    <!-- Pilih Mode Game -->
     <?php if (!isset($_SESSION['kesempatan']) && !isset($_SESSION['mode'])): ?>
         <form method="post">
             <label>Pilih Mode Game:</label><br>
@@ -197,7 +174,7 @@ if (isset($_SESSION['kesempatan']) && $pemberitahuan === "") {
         </form>
     <?php endif; ?>
 
-    <!-- STEP 2: Pilih tingkat kesulitan & mulai game -->
+    <!-- Pilih Tingkat Kesulitan / Batas Angka -->
     <?php if (!isset($_SESSION['kesempatan']) && isset($_SESSION['mode'])): ?>
         <form method="post">
             <?php if ($_SESSION['mode'] === "angka"): ?>
@@ -220,7 +197,7 @@ if (isset($_SESSION['kesempatan']) && $pemberitahuan === "") {
         </form>
     <?php endif; ?>
 
-    <!-- Step 3: Game sedang berjalan || selesai -->
+    <!-- Bermain Game / Tampil Hasil -->
     <?php if (isset($_SESSION['kesempatan'])): ?>
         <div class="pemberitahuan"><?= $pemberitahuan ?></div>
         <?php if ($pemberitahuan2 !== ""): ?>
@@ -244,8 +221,7 @@ if (isset($_SESSION['kesempatan']) && $pemberitahuan === "") {
 
                 <button type="submit">Jawab</button>
             </form>
-            
-        <?php else: // game over: tampil tombol Main Lagi ?>
+        <?php else: ?>
             <form method="post" class="inline">
                 <button type="submit" name="ulang">🔄 Main Lagi</button>
             </form>

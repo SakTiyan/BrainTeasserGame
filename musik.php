@@ -13,18 +13,16 @@
 <script>
 const audio = document.getElementById("backsound");
 
-// tangkap posisi saat ganti step
 window.addEventListener("beforeunload", () => {
-   localStorage.setItem("musicTime", audio.currentTime); // simpan posisi terakhir
+   localStorage.setItem("musicTime", audio.currentTime);
 });
 
-// jalankan saat sudah ganti step
 window.addEventListener("load", () => {
-   const lastTime = localStorage.getItem("musicTime"); // ambil posisi terakhir
+   const lastTime = localStorage.getItem("musicTime");
    if (lastTime) {
-      audio.currentTime = parseFloat(lastTime); // lanjutkan dari posisi terakhir
+      audio.currentTime = parseFloat(lastTime);
    }
-   audio.play(); // mainkan cuy
+   audio.play();
 });
 </script>
 </body>
