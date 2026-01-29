@@ -43,15 +43,17 @@ Soal meliputi operasi penjumlahan, pengurangan, perkalian, dan pembagian.
 ### 2. Instalasi Lokal
 1. Clone repository atau unduh source code:
    ```bash
-   git clone https://github.com/username/brain-teasser-game.git
+   git clone https://github.com/SakTiyan/BrainTeasserGame.git
 
 2. Masuk folder sesuai direktori web server masing-masing:
    - **Laragon**
    ```bash
    C:\laragon\www\
+   ```
    - **Xampp**
    ```bash
    C:\xampp\htdocs\
+   ```
 
 ### 3. Pastikan semua file berada dalam satu folder project.
 
@@ -60,5 +62,5 @@ Soal meliputi operasi penjumlahan, pengurangan, perkalian, dan pembagian.
 /
 ├── backsound.mp3  # File backsound
 ├── index.php      # Logika utama game & tampilan
-├── style.css      # Styling tampilan
 ├── musik.php      # Pemutar backsound
+├── style.css      # Styling tampilan
