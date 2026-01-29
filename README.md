@@ -3,8 +3,6 @@
 Brain Teasser Game adalah permainan berbasis web sederhana yang dibuat menggunakan **PHP native** dan **CSS native**.  
 Game ini dirancang untuk melatih logika dan konsentrasi pemain melalui dua mode permainan yang berbeda.
 
----
-
 ## Fitur Utama
 - Dua mode permainan:
   - **Tebak Angka**
@@ -14,8 +12,6 @@ Game ini dirancang untuk melatih logika dan konsentrasi pemain melalui dua mode 
 - Tampilan sederhana dan responsif
 - Menggunakan session PHP untuk menyimpan state permainan
 - Background musik otomatis saat game berjalan
-
----
 
 ## Mode Permainan
 
@@ -31,15 +27,11 @@ Pemain harus menjawab soal matematika acak berdasarkan tingkat kesulitan:
 
 Soal meliputi operasi penjumlahan, pengurangan, perkalian, dan pembagian.
 
----
-
 ## Teknologi yang Digunakan
 - **PHP Native** (tanpa framework)
 - **CSS Native**
 - **HTML5**
 - Session PHP
-
----
 
 ## Cara Instalasi
 
@@ -62,8 +54,6 @@ Soal meliputi operasi penjumlahan, pengurangan, perkalian, dan pembagian.
    C:\xampp\htdocs\
 
 ### 3. Pastikan semua file berada dalam satu folder project.
-
----
 
 ## Struktur File
 ```text
